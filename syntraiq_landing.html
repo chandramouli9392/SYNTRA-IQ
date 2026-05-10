@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--c1:#6366f1;--c2:#8b5cf6;--c3:#06b6d4;--c4:#10b981;
+--bg:#080a14;--bg2:#0d1020;--bg3:#111524;
+--surface:#141828;--surface2:#1a2035;--surface3:#1f2540;
+--border:#ffffff12;--border2:#ffffff1e;
+--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+--glow1:rgba(99,102,241,0.4);--glow2:rgba(139,92,246,0.3);--glow3:rgba(6,182,212,0.3);
+}
+html,body{width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+
+/* === CANVAS BG === */
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* === GRID BG === */
+.grid-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 70%)}
+
+/* === GRADIENT ORBS === */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:1;animation:orbFloat 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.25),transparent 70%);top:-100px;left:-150px;animation-delay:0s}
+.orb2{width:600px;height:600px;background:radial-gradient(circle,rgba(139,92,246,0.2),transparent 70%);top:20%;right:-200px;animation-delay:-3s}
+.orb3{width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.18),transparent 70%);bottom:10%;left:20%;animation-delay:-6s}
+.orb4{width:300px;height:300px;background:radial-gradient(circle,rgba(16,185,129,0.15),transparent 70%);top:50%;right:10%;animation-delay:-2s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-20px) scale(1.05)}50%{transform:translate(-20px,30px) scale(0.95)}75%{transform:translate(20px,20px) scale(1.03)}}
+
+/* === NAVBAR === */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;
+  background:rgba(8,10,20,0.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.logo-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.2))}
+.logo-icon svg{width:18px;height:18px;fill:none;stroke:white;stroke-width:2}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:400;transition:color 0.2s;cursor:pointer}
+.nav-links a:hover{color:var(--text)}
+.nav-ctas{display:flex;gap:12px;align-items:center}
+.btn-ghost{padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.btn-ghost:hover{background:var(--surface);border-color:rgba(99,102,241,0.4)}
+.btn-primary{padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--c1),var(--c2));color:white;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left 0.4s}
+.btn-primary:hover::before{left:100%}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,102,241,0.4)}
+
+/* === HERO === */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 80px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);font-size:12px;font-weight:500;color:rgba(165,180,252,1);margin-bottom:28px;animation:fadeUp 0.8s ease both}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--c1);animation:pulse 2s ease-in-out infinite;box-shadow:0 0 8px var(--c1)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(42px,7vw,88px);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:24px;animation:fadeUp 0.8s 0.1s ease both;color:var(--text)}
+h1 .gradient-text{background:linear-gradient(135deg,#a5b4fc,#818cf8,#6366f1,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200%;animation:gradientShift 4s ease-in-out infinite}
+@keyframes gradientShift{0%,100%{background-position:0%}50%{background-position:100%}}
+.hero-sub{font-size:18px;color:var(--text2);max-width:560px;line-height:1.7;margin-bottom:40px;animation:fadeUp 0.8s 0.2s ease both;font-weight:300}
+.hero-ctas{display:flex;gap:14px;align-items:center;animation:fadeUp 0.8s 0.3s ease both;flex-wrap:wrap;justify-content:center}
+.btn-hero-primary{padding:14px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--c1),var(--c2));color:white;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;position:relative;overflow:hidden;transition:all 0.3s}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(99,102,241,0.45)}
+.btn-hero-secondary{padding:14px 28px;border-radius:10px;border:1px solid var(--border2);background:rgba(255,255,255,0.03);color:var(--text);font-size:15px;font-weight:400;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+.btn-hero-secondary:hover{background:var(--surface);border-color:rgba(99,102,241,0.4);transform:translateY(-1px)}
+.hero-stats{display:flex;gap:48px;margin-top:64px;animation:fadeUp 0.8s 0.5s ease both;flex-wrap:wrap;justify-content:center}
+.stat-item{text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--c1),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:12px;color:var(--text3);margin-top:2px}
+.hero-divider{width:1px;height:40px;background:var(--border);align-self:center}
+
+/* === TYPING === */
+.typing-wrap{display:inline-block;position:relative}
+.typing-cursor{display:inline-block;width:3px;height:0.85em;background:var(--c1);margin-left:4px;vertical-align:middle;animation:blink 0.9s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* === DASHBOARD PREVIEW === */
+.dashboard-wrap{position:relative;z-index:10;padding:0 24px 100px;display:flex;justify-content:center}
+.dashboard-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(99,102,241,0.15),transparent 70%);pointer-events:none}
+.dashboard-frame{width:100%;max-width:900px;border-radius:16px;border:1px solid var(--border2);overflow:hidden;position:relative;background:var(--surface);box-shadow:0 40px 120px rgba(0,0,0,0.6),0 0 0 1px rgba(99,102,241,0.1);animation:fadeUp 1s 0.6s ease both}
+.dashboard-topbar{height:40px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.dashboard-inner{display:grid;grid-template-columns:200px 1fr;min-height:440px}
+.db-sidebar{background:var(--bg3);border-right:1px solid var(--border);padding:16px 0}
+.db-sidebar-logo{padding:0 16px 16px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.db-logo-icon{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.db-nav-item{padding:8px 16px;font-size:12px;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:0;transition:background 0.15s;color:var(--text2)}
+.db-nav-item:hover{background:var(--surface);color:var(--text)}
+.db-nav-item.active{background:rgba(99,102,241,0.12);color:#a5b4fc;border-right:2px solid var(--c1)}
+.db-nav-icon{width:14px;height:14px;border-radius:3px;background:currentColor;opacity:0.5}
+.db-main{padding:20px;overflow:hidden}
+.db-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.db-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.db-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.db-actions{display:flex;gap:8px}
+.db-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.db-btn.primary{background:var(--c1);border-color:var(--c1);color:white}
+.db-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;position:relative;overflow:hidden}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent)}
+.metric-card.c1{--c:var(--c1)}.metric-card.c2{--c:var(--c2)}.metric-card.c3{--c:var(--c3)}.metric-card.c4{--c:var(--c4)}
+.metric-icon{width:24px;height:24px;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.metric-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.metric-lab{font-size:10px;color:var(--text3);margin-top:1px}
+.metric-change{font-size:10px;color:#10b981;position:absolute;top:10px;right:10px}
+.db-kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kb-col{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px}
+.kb-col-header{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.kb-count{width:16px;height:16px;border-radius:4px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text2)}
+.kb-card{background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;position:relative}
+.kb-card:hover{border-color:rgba(99,102,241,0.4);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.kb-card-title{font-size:11px;font-weight:500;margin-bottom:6px;line-height:1.3}
+.kb-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{padding:2px 6px;border-radius:3px;font-size:9px;font-weight:500}
+.tag-p{background:rgba(239,68,68,0.15);color:#f87171}
+.tag-m{background:rgba(245,158,11,0.15);color:#fbbf24}
+.tag-l{background:rgba(16,185,129,0.15);color:#34d399}
+.tag-ui{background:rgba(99,102,241,0.15);color:#a5b4fc}
+.tag-api{background:rgba(6,182,212,0.15);color:#67e8f9}
+.avatar-row{display:flex;margin-top:6px}
+.av{width:14px;height:14px;border-radius:50%;margin-right:-4px;border:1px solid var(--surface3);font-size:7px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.av1{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white}
+.av2{background:linear-gradient(135deg,#06b6d4,#10b981);color:white}
+.av3{background:linear-gradient(135deg,#f97316,#ef4444);color:white}
+
+/* === FEATURES === */
+.features{position:relative;z-index:10;padding:80px 24px;max-width:1100px;margin:0 auto}
+.section-label{text-align:center;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--c1);margin-bottom:12px;animation:fadeUp 0.8s ease both}
+.section-title{text-align:center;font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:16px;animation:fadeUp 0.8s 0.1s ease both}
+.section-sub{text-align:center;color:var(--text2);font-size:16px;max-width:520px;margin:0 auto 60px;line-height:1.7;animation:fadeUp 0.8s 0.2s ease both;font-weight:300}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all 0.3s;position:relative;overflow:hidden;cursor:pointer}
+.feature-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--fc1,rgba(99,102,241,0.05)),transparent);opacity:0;transition:opacity 0.3s}
+.feature-card:hover::before{opacity:1}
+.feature-card:hover{border-color:var(--fb,rgba(99,102,241,0.3));transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.feature-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px}
+.feature-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.6;font-weight:300}
+.feature-card.f1{--fc1:rgba(99,102,241,0.08);--fb:rgba(99,102,241,0.35)}
+.feature-card.f2{--fc1:rgba(139,92,246,0.08);--fb:rgba(139,92,246,0.35)}
+.feature-card.f3{--fc1:rgba(6,182,212,0.08);--fb:rgba(6,182,212,0.35)}
+.feature-card.f4{--fc1:rgba(16,185,129,0.08);--fb:rgba(16,185,129,0.35)}
+.feature-card.f5{--fc1:rgba(245,158,11,0.08);--fb:rgba(245,158,11,0.35)}
+.feature-card.f6{--fc1:rgba(239,68,68,0.08);--fb:rgba(239,68,68,0.35)}
+
+/* === WORKFLOW === */
+.workflow{position:relative;z-index:10;padding:80px 24px;background:linear-gradient(180deg,transparent,rgba(99,102,241,0.03),transparent)}
+.workflow-inner{max-width:900px;margin:0 auto}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px;position:relative}
+.steps-grid::before{content:'';position:absolute;top:30px;left:12.5%;right:12.5%;height:1px;background:linear-gradient(90deg,transparent,var(--c1),var(--c2),var(--c3),transparent);opacity:0.4}
+.step-card{text-align:center;position:relative}
+.step-num{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;position:relative}
+.step-num::before{content:'';position:absolute;inset:-2px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2));z-index:-1}
+.step-num::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--bg3)}
+.step-num span{position:relative;z-index:1}
+.step-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px}
+.step-desc{font-size:12px;color:var(--text3);line-height:1.6}
+
+/* === AI SECTION === */
+.ai-section{position:relative;z-index:10;padding:80px 24px;max-width:1100px;margin:0 auto}
+.ai-inner{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:48px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;overflow:hidden}
+.ai-inner::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,0.12),transparent 70%);pointer-events:none}
+.ai-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);font-size:11px;color:#a5b4fc;margin-bottom:16px}
+.ai-title{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:16px}
+.ai-desc{color:var(--text2);font-size:14px;line-height:1.8;font-weight:300}
+.ai-features{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+.ai-feat{display:flex;align-items:flex-start;gap:12px}
+.ai-feat-icon{width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--c1),var(--c2));flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.ai-feat-text{font-size:13px;color:var(--text2);line-height:1.5}
+.ai-right{position:relative}
+.ai-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;position:relative}
+.ai-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-card-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s ease-in-out infinite}
+.ai-progress-bar{height:4px;border-radius:2px;background:var(--surface3);overflow:hidden;margin-bottom:6px}
+.ai-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width 0.3s}
+.ai-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:12px}
+.bar-item{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,rgba(99,102,241,0.8),rgba(99,102,241,0.3));min-height:4px;transition:height 0.5s}
+
+/* === TESTIMONIALS === */
+.testimonials{position:relative;z-index:10;padding:80px 24px;max-width:1100px;margin:0 auto;text-align:center}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:left;transition:all 0.3s;position:relative}
+.testi-card:hover{border-color:rgba(99,102,241,0.3);transform:translateY(-3px)}
+.testi-quote{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px;font-weight:300}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:32px;height:32px;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.testi-name{font-size:13px;font-weight:500}
+.testi-role{font-size:11px;color:var(--text3)}
+.stars{color:#fbbf24;font-size:11px;margin-bottom:14px;letter-spacing:2px}
+
+/* === CTA SECTION === */
+.cta-section{position:relative;z-index:10;padding:100px 24px;text-align:center}
+.cta-inner{max-width:600px;margin:0 auto}
+.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(99,102,241,0.2),transparent 70%);pointer-events:none}
+.cta-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px}
+.cta-sub{color:var(--text2);font-size:16px;line-height:1.7;margin-bottom:40px;font-weight:300}
+
+/* === FOOTER === */
+footer{position:relative;z-index:10;padding:40px 32px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{color:var(--text3);text-decoration:none;font-size:13px;transition:color 0.2s;cursor:pointer}
+.footer-links a:hover{color:var(--text2)}
+.footer-copy{font-size:12px;color:var(--text3)}
+
+/* === ANIMATIONS === */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{opacity:0;transform:translateY(20px);transition:all 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* === NOTIFICATION TOAST === */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:12px 16px;z-index:1000;display:flex;align-items:center;gap:10px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,0.4);transform:translateY(100px);opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--c4);animation:pulse 2s infinite}
+
+/* === COMMAND PALETTE === */
+.cmd-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.cmd-overlay.open{opacity:1;pointer-events:all}
+.cmd-palette{width:560px;background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.6);transform:scale(0.95) translateY(-10px);transition:transform 0.2s}
+.cmd-overlay.open .cmd-palette{transform:scale(1) translateY(0)}
+.cmd-input-wrap{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.cmd-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif}
+.cmd-results{max-height:320px;overflow-y:auto}
+.cmd-result{padding:12px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.15s;font-size:13px}
+.cmd-result:hover,.cmd-result.selected{background:var(--surface2)}
+.cmd-result-icon{width:28px;height:28px;border-radius:6px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.cmd-result-title{font-weight:500}
+.cmd-result-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.cmd-hint{padding:10px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;gap:16px}
+.cmd-key{background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:10px}
+
+/* === SCROLL BAR === */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+
+/* === GLOWING BORDER ANIM === */
+@keyframes borderGlow{0%,100%{border-color:rgba(99,102,241,0.2)}50%{border-color:rgba(99,102,241,0.5)}}
+.glow-border{animation:borderGlow 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- Canvas for particle system -->
+<canvas id="canvas"></canvas>
+<div class="grid-bg"></div>
+
+<!-- Floating gradient orbs -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="orb orb4"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 18 18"><path d="M3 9l3-3 3 3 3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="9" r="1.5" fill="white" stroke="none"/></svg>
+    </div>
+    SyntraIQ
+  </div>
+  <div class="nav-links">
+    <a onclick="scrollToSection('features')">Features</a>
+    <a onclick="scrollToSection('workflow')">Workflow</a>
+    <a onclick="scrollToSection('ai')">AI Engine</a>
+    <a onclick="showToast()">Pricing</a>
+  </div>
+  <div class="nav-ctas">
+    <button class="btn-ghost" onclick="openCmd()">⌘K</button>
+    <button class="btn-ghost" onclick="showToast()">Sign In</button>
+    <button class="btn-primary" onclick="showToast()">Get Started Free</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Now in Public Beta — Join 12,000+ teams
+  </div>
+  <h1>
+    The AI OS for<br>
+    <span class="gradient-text"><span id="typing-text">Teams that Execute</span><span class="typing-cursor"></span></span>
+  </h1>
+  <p class="hero-sub">Unify projects, automate workflows, and ship faster with an AI-native platform that thinks alongside your team.</p>
+  <div class="hero-ctas">
+    <button class="btn-hero-primary" onclick="showToast()">
+      Start Free → No credit card needed
+    </button>
+    <button class="btn-hero-secondary" onclick="showToast()">
+      <span style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px">▶</span>
+      Watch Demo
+    </button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">98%</div><div class="stat-label">On-time delivery</div></div>
+    <div class="hero-divider"></div>
+    <div class="stat-item"><div class="stat-num">3.2×</div><div class="stat-label">Faster execution</div></div>
+    <div class="hero-divider"></div>
+    <div class="stat-item"><div class="stat-num">12K+</div><div class="stat-label">Teams active</div></div>
+    <div class="hero-divider"></div>
+    <div class="stat-item"><div class="stat-num">99.9%</div><div class="stat-label">Uptime SLA</div></div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="dashboard-wrap">
+  <div class="dashboard-glow"></div>
+  <div class="dashboard-frame glow-border">
+    <div class="dashboard-topbar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <div style="flex:1;text-align:center;font-size:11px;color:var(--text3)">syntraiq.app — Team Dashboard</div>
+    </div>
+    <div class="dashboard-inner">
+      <!-- Sidebar -->
+      <div class="db-sidebar">
+        <div class="db-sidebar-logo">
+          <div class="db-logo-icon"></div>
+          SyntraIQ
+        </div>
+        <div class="db-nav-item active">📊 Dashboard</div>
+        <div class="db-nav-item">📋 Projects</div>
+        <div class="db-nav-item">✅ My Tasks</div>
+        <div class="db-nav-item">🤖 AI Insights</div>
+        <div class="db-nav-item">📈 Analytics</div>
+        <div class="db-nav-item">👥 Team</div>
+        <div class="db-nav-item">⚙️ Settings</div>
+        <div style="margin-top:20px;padding:0 12px">
+          <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.15));border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:12px;font-size:11px;color:var(--text2)">
+            <div style="font-weight:600;color:#a5b4fc;margin-bottom:4px">🤖 AI Summary</div>
+            3 tasks at risk. Sprint velocity +18% this week.
+          </div>
+        </div>
+      </div>
+      <!-- Main -->
+      <div class="db-main">
+        <div class="db-header">
+          <div><div class="db-title">Project Overview</div><div class="db-sub">Sprint 14 · 12 active tasks</div></div>
+          <div class="db-actions">
+            <button class="db-btn">Filter</button>
+            <button class="db-btn">+ Invite</button>
+            <button class="db-btn primary">+ New Task</button>
+          </div>
+        </div>
+        <!-- Metrics -->
+        <div class="db-metrics">
+          <div class="metric-card c1">
+            <div class="metric-icon" style="background:rgba(99,102,241,0.15);color:#a5b4fc">📁</div>
+            <div class="metric-val" style="color:#a5b4fc">24</div>
+            <div class="metric-lab">Active Projects</div>
+            <div class="metric-change">+3 ↑</div>
+          </div>
+          <div class="metric-card c2">
+            <div class="metric-icon" style="background:rgba(139,92,246,0.15);color:#c4b5fd">✅</div>
+            <div class="metric-val" style="color:#c4b5fd">142</div>
+            <div class="metric-lab">Completed</div>
+            <div class="metric-change">+12 ↑</div>
+          </div>
+          <div class="metric-card c3">
+            <div class="metric-icon" style="background:rgba(6,182,212,0.15);color:#67e8f9">⏳</div>
+            <div class="metric-val" style="color:#67e8f9">38</div>
+            <div class="metric-lab">In Progress</div>
+            <div class="metric-change">+5 ↑</div>
+          </div>
+          <div class="metric-card c4">
+            <div class="metric-icon" style="background:rgba(239,68,68,0.15);color:#f87171">🔥</div>
+            <div class="metric-val" style="color:#f87171">7</div>
+            <div class="metric-lab">Overdue</div>
+            <div class="metric-change" style="color:#f87171">-2 ↓</div>
+          </div>
+        </div>
+        <!-- Kanban -->
+        <div class="db-kanban">
+          <div class="kb-col">
+            <div class="kb-col-header">Todo <span class="kb-count">4</span></div>
+            <div class="kb-card">
+              <div class="kb-card-title">Auth system refactor</div>
+              <div class="kb-tags"><span class="tag tag-p">Critical</span><span class="tag tag-api">API</span></div>
+              <div class="avatar-row"><div class="av av1">JK</div></div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">Design tokens update</div>
+              <div class="kb-tags"><span class="tag tag-m">Medium</span><span class="tag tag-ui">UI</span></div>
+            </div>
+          </div>
+          <div class="kb-col">
+            <div class="kb-col-header">In Progress <span class="kb-count">3</span></div>
+            <div class="kb-card" style="border-color:rgba(99,102,241,0.35)">
+              <div class="kb-card-title">AI dashboard widgets</div>
+              <div class="kb-tags"><span class="tag tag-p">High</span><span class="tag tag-ui">UI</span></div>
+              <div class="avatar-row"><div class="av av2">AR</div><div class="av av3">MB</div></div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">API rate limiting</div>
+              <div class="kb-tags"><span class="tag tag-m">Medium</span><span class="tag tag-api">API</span></div>
+            </div>
+          </div>
+          <div class="kb-col">
+            <div class="kb-col-header">Review <span class="kb-count">2</span></div>
+            <div class="kb-card">
+              <div class="kb-card-title">Mobile responsive layout</div>
+              <div class="kb-tags"><span class="tag tag-m">Medium</span><span class="tag tag-ui">UI</span></div>
+              <div class="avatar-row"><div class="av av1">JK</div></div>
+            </div>
+          </div>
+          <div class="kb-col">
+            <div class="kb-col-header">Done <span class="kb-count">8</span></div>
+            <div class="kb-card" style="opacity:0.65">
+              <div class="kb-card-title">Setup CI/CD pipeline</div>
+              <div class="kb-tags"><span class="tag tag-l">Done</span></div>
+            </div>
+            <div class="kb-card" style="opacity:0.65">
+              <div class="kb-card-title">PostgreSQL migrations</div>
+              <div class="kb-tags"><span class="tag tag-l">Done</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features fade-in" id="features">
+  <div class="section-label">Platform Features</div>
+  <h2 class="section-title">Everything your team needs<br>to <span class="gradient-text">execute at 10×</span></h2>
+  <p class="section-sub">A complete operating system for modern teams — from planning to shipping.</p>
+  <div class="features-grid">
+    <div class="feature-card f1 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(99,102,241,0.12)">🧩</div>
+      <div class="feature-title">AI-Powered Kanban</div>
+      <div class="feature-desc">Drag-and-drop boards with intelligent task routing, priority scoring, and automated status transitions powered by ML.</div>
+    </div>
+    <div class="feature-card f2 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.12)">🤖</div>
+      <div class="feature-title">Intelligent Insights</div>
+      <div class="feature-desc">Real-time AI analysis surfaces bottlenecks, predicts delivery risks, and recommends workload rebalancing before issues escalate.</div>
+    </div>
+    <div class="feature-card f3 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(6,182,212,0.12)">⚡</div>
+      <div class="feature-title">Real-Time Collaboration</div>
+      <div class="feature-desc">Live presence, instant comments, and synchronized Kanban updates so every team member stays perfectly aligned.</div>
+    </div>
+    <div class="feature-card f4 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.12)">📊</div>
+      <div class="feature-title">Analytics Command Center</div>
+      <div class="feature-desc">Interactive charts, velocity tracking, heatmaps, and team performance metrics in a single breathtaking dashboard.</div>
+    </div>
+    <div class="feature-card f5 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.12)">🔐</div>
+      <div class="feature-title">Enterprise RBAC</div>
+      <div class="feature-desc">Granular role-based access control with admin and member tiers, SSO support, and audit logging for full compliance.</div>
+    </div>
+    <div class="feature-card f6 fade-in" onclick="showToast()">
+      <div class="feature-icon" style="background:rgba(239,68,68,0.12)">🌐</div>
+      <div class="feature-title">Global Command Palette</div>
+      <div class="feature-desc">Navigate anything instantly with ⌘K — create tasks, search projects, run AI commands, and trigger automations in one keystroke.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="workflow" id="workflow">
+  <div class="workflow-inner fade-in">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">From chaos to clarity<br>in <span class="gradient-text">four steps</span></h2>
+    <div class="steps-grid">
+      <div class="step-card fade-in">
+        <div class="step-num" style="color:#a5b4fc"><span>01</span></div>
+        <div class="step-title">Create Workspace</div>
+        <div class="step-desc">Set up your team org, invite members, and configure roles in under 2 minutes.</div>
+      </div>
+      <div class="step-card fade-in">
+        <div class="step-num" style="color:#c4b5fd"><span>02</span></div>
+        <div class="step-title">Build Projects</div>
+        <div class="step-desc">Structure work into projects with smart templates, milestones, and automated task generation.</div>
+      </div>
+      <div class="step-card fade-in">
+        <div class="step-num" style="color:#67e8f9"><span>03</span></div>
+        <div class="step-title">Execute & Track</div>
+        <div class="step-desc">Assign, prioritize, and move tasks while AI monitors progress and surfaces risks in real time.</div>
+      </div>
+      <div class="step-card fade-in">
+        <div class="step-num" style="color:#34d399"><span>04</span></div>
+        <div class="step-title">Analyze & Scale</div>
+        <div class="step-desc">Get AI-powered retrospectives, performance analytics, and optimization recommendations to continuously improve.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI SECTION -->
+<section class="ai-section fade-in" id="ai">
+  <div class="ai-inner">
+    <div>
+      <div class="ai-badge">✦ Powered by Advanced AI</div>
+      <h3 class="ai-title">Your team's AI<br>productivity engine</h3>
+      <p class="ai-desc">SyntraIQ's built-in AI doesn't just show data — it interprets it, predicts outcomes, and guides your team to peak performance.</p>
+      <div class="ai-features">
+        <div class="ai-feat">
+          <div class="ai-feat-icon">✦</div>
+          <div class="ai-feat-text">Smart overdue prediction with 92% accuracy up to 5 days in advance</div>
+        </div>
+        <div class="ai-feat">
+          <div class="ai-feat-icon">⚡</div>
+          <div class="ai-feat-text">Automated task summaries and AI-generated progress reports</div>
+        </div>
+        <div class="ai-feat">
+          <div class="ai-feat-icon">🎯</div>
+          <div class="ai-feat-text">Workload balancing recommendations based on team capacity and velocity</div>
+        </div>
+        <div class="ai-feat">
+          <div class="ai-feat-icon">📈</div>
+          <div class="ai-feat-text">Productivity scoring with personalized improvement suggestions</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-right">
+      <div class="ai-card" style="border-color:rgba(99,102,241,0.3)">
+        <div class="ai-card-header">
+          <div class="ai-card-dot" style="background:#10b981"></div>
+          <span style="font-size:12px;font-weight:600;color:#a5b4fc">AI Productivity Score</span>
+        </div>
+        <div style="font-size:32px;font-weight:800;font-family:'Syne',sans-serif;color:#a5b4fc">87<span style="font-size:16px">/100</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">+12 pts from last sprint</div>
+        <div class="ai-progress-bar"><div class="ai-progress-fill" style="width:87%"></div></div>
+      </div>
+      <div class="ai-card">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px">Weekly Task Velocity</div>
+        <div class="ai-chart" id="ai-chart"></div>
+      </div>
+      <div class="ai-card" style="border-color:rgba(245,158,11,0.25)">
+        <div class="ai-card-header">
+          <div class="ai-card-dot" style="background:#f59e0b"></div>
+          <span style="font-size:12px;font-weight:600;color:#fbbf24">AI Risk Alert</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6">
+          <strong style="color:#fbbf24">Auth refactor</strong> — 74% probability of missing deadline. Consider assigning additional resources.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials fade-in">
+  <div class="section-label">Social Proof</div>
+  <h2 class="section-title">Loved by <span class="gradient-text">high-performance teams</span></h2>
+  <div class="testi-grid">
+    <div class="testi-card fade-in">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"SyntraIQ completely transformed how our engineering team operates. The AI insights alone saved us 6 hours per sprint. It feels like having a project manager who never sleeps."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white">SK</div>
+        <div><div class="testi-name">Sarah Kim</div><div class="testi-role">CTO at Velocify</div></div>
+      </div>
+    </div>
+    <div class="testi-card fade-in">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"The real-time kanban with AI overdue prediction is witchcraft. Our delivery rate went from 64% to 91% on-time in the first month. This is the future of project management."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:linear-gradient(135deg,#06b6d4,#10b981);color:white">MR</div>
+        <div><div class="testi-name">Marcus Rhodes</div><div class="testi-role">Founder at Archon Labs</div></div>
+      </div>
+    </div>
+    <div class="testi-card fade-in">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"We replaced Jira, Notion, and Linear with SyntraIQ. The unified AI dashboard gives us visibility we never had before. The entire team is more focused and productive."</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:linear-gradient(135deg,#f97316,#ef4444);color:white">AP</div>
+        <div><div class="testi-name">Ariana Patel</div><div class="testi-role">VP Engineering at Nexus AI</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section fade-in">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <h2 class="cta-title">Ready to execute <span class="gradient-text">smarter?</span></h2>
+    <p class="cta-sub">Join 12,000+ teams already shipping faster with SyntraIQ's AI-powered execution platform.</p>
+    <div class="hero-ctas">
+      <button class="btn-hero-primary" onclick="showToast()">Start Free — No credit card →</button>
+      <button class="btn-hero-secondary" onclick="showToast()">Book a Demo</button>
+    </div>
+    <div style="margin-top:24px;font-size:12px;color:var(--text3)">Free 14-day trial · No credit card · Cancel anytime</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="logo-icon" style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--c1),var(--c2))"></div>
+    SyntraIQ
+  </div>
+  <div class="footer-links">
+    <a>Product</a><a>Features</a><a>Pricing</a><a>Blog</a><a>Docs</a><a>Changelog</a>
+  </div>
+  <div class="footer-copy">© 2025 SyntraIQ. All rights reserved.</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg">Feature coming soon! 🚀</span>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="closeCmd(event)">
+  <div class="cmd-palette">
+    <div class="cmd-input-wrap">
+      <span style="font-size:16px;color:var(--text3)">⌘</span>
+      <input class="cmd-input" id="cmd-input" placeholder="Search tasks, projects, team members..." oninput="filterCmd(this.value)" onkeydown="cmdKey(event)" autofocus>
+    </div>
+    <div class="cmd-results" id="cmd-results"></div>
+    <div class="cmd-hint">
+      <span><span class="cmd-key">↑↓</span> Navigate</span>
+      <span><span class="cmd-key">↵</span> Select</span>
+      <span><span class="cmd-key">Esc</span> Close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// === PARTICLE CANVAS ===
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], connections = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.vy = (Math.random() - 0.5) * 0.3;
+    this.r = Math.random() * 1.5 + 0.5;
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.color = Math.random() > 0.5 ? '99,102,241' : (Math.random() > 0.5 ? '139,92,246' : '6,182,212');
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.color},${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+let mouseX = -9999, mouseY = -9999;
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+function drawConnections() {
+  const maxDist = 120;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      if (d < maxDist) {
+        const alpha = (1 - d/maxDist) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(99,102,241,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+    // Mouse attraction
+    const mdx = particles[i].x - mouseX;
+    const mdy = particles[i].y - mouseY;
+    const md = Math.sqrt(mdx*mdx + mdy*mdy);
+    if (md < 150) {
+      const alpha = (1 - md/150) * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(particles[i].x, particles[i].y);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.strokeStyle = `rgba(139,92,246,${alpha})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  drawConnections();
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+// === TYPING EFFECT ===
+const phrases = ['Teams that Execute','Startups that Ship','Leaders who Deliver','Builders that Scale'];
+let pi = 0, ci = 0, del = false, timer;
+function typeLoop() {
+  const el = document.getElementById('typing-text');
+  const phrase = phrases[pi];
+  if (!del) {
+    el.textContent = phrase.slice(0, ++ci);
+    if (ci === phrase.length) { del = true; timer = setTimeout(typeLoop, 2000); return; }
+  } else {
+    el.textContent = phrase.slice(0, --ci);
+    if (ci === 0) { del = false; pi = (pi+1) % phrases.length; timer = setTimeout(typeLoop, 400); return; }
+  }
+  timer = setTimeout(typeLoop, del ? 40 : 70);
+}
+typeLoop();
+
+// === CHART BARS ===
+const heights = [30,45,35,60,50,75,55,80,65,90,70,100];
+const chart = document.getElementById('ai-chart');
+if (chart) {
+  heights.forEach((h, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar-item';
+    bar.style.height = '4px';
+    bar.style.transition = `height ${0.4 + i*0.06}s cubic-bezier(0.34,1.2,0.64,1) ${0.5 + i*0.04}s`;
+    chart.appendChild(bar);
+    setTimeout(() => { bar.style.height = (h * 0.6) + 'px'; }, 100);
+  });
+}
+
+// === SCROLL ANIMATIONS ===
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// === TOAST ===
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg || '🚀 SyntraIQ is launching soon — stay tuned!';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// === COMMAND PALETTE ===
+const cmds = [
+  { icon:'📋', title:'New Project', sub:'Create a project in your workspace' },
+  { icon:'✅', title:'Create Task', sub:'Add a task to the current sprint' },
+  { icon:'👥', title:'Invite Member', sub:'Send team invitation via email' },
+  { icon:'📊', title:'Analytics Dashboard', sub:'View team performance metrics' },
+  { icon:'🤖', title:'AI Insights', sub:'Get AI-powered productivity analysis' },
+  { icon:'⚡', title:'Sprint Planning', sub:'Start a new sprint with AI assistance' },
+  { icon:'🔔', title:'Notifications', sub:'View recent team activity' },
+  { icon:'⚙️', title:'Settings', sub:'Manage workspace preferences' },
+  { icon:'📈', title:'Productivity Report', sub:'Generate weekly performance report' },
+  { icon:'🔐', title:'Manage Roles', sub:'Edit member permissions and access' },
+];
+let cmdSelected = 0, filteredCmds = [...cmds];
+
+function renderCmds() {
+  const el = document.getElementById('cmd-results');
+  el.innerHTML = filteredCmds.map((c,i) => `
+    <div class="cmd-result${i===cmdSelected?' selected':''}" onclick="selectCmd(${i})">
+      <div class="cmd-result-icon">${c.icon}</div>
+      <div><div class="cmd-result-title">${c.title}</div><div class="cmd-result-sub">${c.sub}</div></div>
+    </div>`).join('');
+}
+
+function filterCmd(v) {
+  filteredCmds = cmds.filter(c => c.title.toLowerCase().includes(v.toLowerCase()) || c.sub.toLowerCase().includes(v.toLowerCase()));
+  cmdSelected = 0;
+  renderCmds();
+}
+
+function cmdKey(e) {
+  if (e.key === 'ArrowDown') { cmdSelected = Math.min(cmdSelected+1, filteredCmds.length-1); renderCmds(); }
+  if (e.key === 'ArrowUp') { cmdSelected = Math.max(cmdSelected-1, 0); renderCmds(); }
+  if (e.key === 'Enter') selectCmd(cmdSelected);
+  if (e.key === 'Escape') closeCmd();
+}
+
+function selectCmd(i) {
+  const c = filteredCmds[i];
+  if (c) showToast(`Action: "${c.title}" — coming soon!`);
+  closeCmd();
+}
+
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  document.getElementById('cmd-input').value = '';
+  filteredCmds = [...cmds]; cmdSelected = 0; renderCmds();
+  setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+}
+
+function closeCmd(e) {
+  if (!e || e.target === document.getElementById('cmd-overlay'))
+    document.getElementById('cmd-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCmd(); }
+});
+
+renderCmds();
+
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
